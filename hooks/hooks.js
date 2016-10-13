@@ -1,10 +1,11 @@
 'use strict';
 
-var fs = require('fs');
 var path = require('path');
+var referenceKey = [];
 
 var hooks = {
   afterEditorFormBlocks: function (blocks, json, abe) {
+    referenceKey = [];
 
     var getobj = function (obj, idx, key) {
       var res = [];
@@ -21,7 +22,7 @@ var hooks = {
           "display": "",
           "reload": false,
           "order": "",
-          "required": "",
+          "required": false,
           "editable": false,
           "visible": "",
           "block": "",
@@ -42,25 +43,32 @@ var hooks = {
         var reference = [];
         var index = 0;
         var sourceAttr = abe.cmsData.regex.getAttr(match, 'source');
+        if(/\{\{(.*?)\}\}/.test(sourceAttr)){
+          var key = sourceAttr.match(/\{\{(.*?)\}\}/)[1];
+          sourceAttr = sourceAttr.replace(/\{\{(.*?)\}\}/, json[key]);
+        }
         var jsonData = abe.cmsData.file.get(path.join(abe.config.root, sourceAttr));
-        var fileName = sourceAttr.replace(new RegExp(abe.config.reference.url + '/(.*?)\.json'), '$1');
-        json.reference = [];
+        var fileName = abe.cmsData.regex.getAttr(match, 'key');
+        if(referenceKey.indexOf(referenceKey) < -1) referenceKey.push(fileName)
+        json[fileName] = [];
         if(Object.prototype.toString.call(jsonData) === "[object Array]"){
           jsonData.forEach(function (el) {
             if(Object.prototype.toString.call(el) === "[object Object]") {
               reference = reference.concat(getobj(el, index++, fileName));
-              json.reference.push(el)
+              json[fileName].push(el)
             }
           });
         }
         if(reference.length > 0) blocks.reference[fileName] = reference;
       });
     }
-console.log(blocks)
+
     return blocks;
   },
   beforeSave: function(obj, abe) {
-    if(typeof obj.json.content.reference !== 'undefined' && obj.json.content.reference !== null) delete obj.json.content.reference;
+    referenceKey.forEach(function (key) {
+      if(typeof obj.json.content[key] !== 'undefined' && obj.json.content[key] !== null) delete obj.json.content[key];
+    });
     return obj
   }
 };
