@@ -19,7 +19,7 @@ var save = function save (node, label) {
 	  	var inputs = block.querySelectorAll('.form-abe');
 	  	Array.prototype.forEach.call(inputs, function (input) {
 	  		var id = input.id;
-	  		key = id.split('[')[0];
+	  		key = input.getAttribute('data-filerefName');
 	  		var index = id.match(/\[(.*?)\]/)[1];
 	  		var subkey = id.split('-')[1];
 	  		if(typeof datas[key] === 'undefined' || datas[key] === null) datas[key] = [];

@@ -7,7 +7,7 @@ var hooks = {
   afterEditorFormBlocks: function (blocks, json, abe) {
     referenceKey = [];
 
-    var getobj = function (obj, idx, key) {
+    var getobj = function (obj, idx, key, keyName) {
       var res = [];
       for(var o in obj) {
         res.push({
@@ -28,7 +28,8 @@ var hooks = {
           "block": "",
           "autocomplete": "",
           "paginate": "",
-          "hint": ""
+          "hint": "",
+          "ref": keyName
         });
       }
       return res;
@@ -48,13 +49,13 @@ var hooks = {
           sourceAttr = sourceAttr.replace(/\{\{(.*?)\}\}/, json[key]);
         }
         var jsonData = abe.cmsData.file.get(path.join(abe.config.root, sourceAttr));
-        var fileName = sourceAttr.replace(new RegExp(abe.config.reference.url +'\/(.*?)\.json'), '$1');
+        var fileName = abe.cmsData.regex.getAttr(match, 'key');
         if(referenceKey.indexOf(referenceKey) < -1) referenceKey.push(fileName)
         json[fileName] = [];
         if(Object.prototype.toString.call(jsonData) === "[object Array]"){
           jsonData.forEach(function (el) {
             if(Object.prototype.toString.call(el) === "[object Object]") {
-              reference = reference.concat(getobj(el, index++, fileName));
+              reference = reference.concat(getobj(el, index++, fileName, sourceAttr.replace(new RegExp(abe.config.reference.url +'\/(.*?)\.json'), '$1')));
               json[fileName].push(el)
             }
           });
@@ -64,6 +65,12 @@ var hooks = {
     }
 
     return blocks;
+  },
+  afterEditorInput: function afterEditorInput(htmlString, params, abe) {
+    if(typeof params.ref !== 'undefined' && params.ref !== null && params.ref !== '') {
+      htmlString = htmlString.replace('data-id', 'data-filerefName="' + params.ref + '" data-id')
+    }
+    return htmlString;
   },
   beforeSave: function(obj, abe) {
     referenceKey.forEach(function (key) {
