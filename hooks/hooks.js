@@ -48,7 +48,7 @@ var hooks = {
           sourceAttr = sourceAttr.replace(/\{\{(.*?)\}\}/, json[key]);
         }
         var jsonData = abe.cmsData.file.get(path.join(abe.config.root, sourceAttr));
-        var fileName = abe.cmsData.regex.getAttr(match, 'key');
+        var fileName = sourceAttr.replace(new RegExp(abe.config.reference.url +'\/(.*?)\.json'), '$1');
         if(referenceKey.indexOf(referenceKey) < -1) referenceKey.push(fileName)
         json[fileName] = [];
         if(Object.prototype.toString.call(jsonData) === "[object Array]"){
