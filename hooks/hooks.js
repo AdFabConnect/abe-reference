@@ -15,6 +15,8 @@ var hooks = {
   afterEditorFormBlocks: function (blocks, json, text, abe) {
     referenceKey = [];
 
+    if(!(json.abe_meta != null)) return blocks;
+
     var getobj = function (obj, idx, key, keyName) {
       var res = [];
       for(var o in obj) {
