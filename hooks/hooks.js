@@ -4,7 +4,7 @@ var path = require('path');
 var referenceKey = [];
 
 var hooks = {
-  afterEditorFormBlocks: function (blocks, json, abe) {
+  afterEditorFormBlocks: function (blocks, json, text, abe) {
     referenceKey = [];
 
     var getobj = function (obj, idx, key, keyName) {
@@ -36,7 +36,7 @@ var hooks = {
     };
 
     var rex = new RegExp('{{abe(.*?)source=["|\']' + abe.config.reference.url +'(.*?)json["|\'](.*?)}}', 'g')
-    var tpl = abe.cmsTemplates.template.getTemplate(json.abe_meta.template);
+    var tpl = text;
     var matches = tpl.match(rex);
     if(matches){
       blocks.reference = {};
@@ -62,6 +62,7 @@ var hooks = {
         }
         if(reference.length > 0) blocks.reference[fileName] = reference;
       });
+
     }
 
     return blocks;
