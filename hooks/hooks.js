@@ -2,8 +2,16 @@
 
 var path = require('path');
 var referenceKey = [];
+var arrayTpl = [];
 
 var hooks = {
+  beforeGetTemplate: function(file, abe) {
+    var html = abe.coreUtils.file.getContent(path.join(abe.config.root, abe.config.templates.url, file) + '.' + abe.config.files.templates.extension);
+    var rex = new RegExp('{{abe(.*?)source=["|\']' + abe.config.reference.url +'(.*?)json["|\'](.*?)}}', 'g')
+    var matches = html.match(rex);
+    arrayTpl[file] = matches;
+    return file
+  },
   afterEditorFormBlocks: function (blocks, json, text, abe) {
     referenceKey = [];
 
@@ -35,9 +43,7 @@ var hooks = {
       return res;
     };
 
-    var rex = new RegExp('{{abe(.*?)source=["|\']' + abe.config.reference.url +'(.*?)json["|\'](.*?)}}', 'g')
-    var tpl = text;
-    var matches = tpl.match(rex);
+    var matches = arrayTpl[json.abe_meta.template];
     if(matches){
       blocks.reference = {};
       matches.forEach(function (match) {
